@@ -1,5 +1,10 @@
 package net.peacefulcraft.tarje.listeners;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +16,16 @@ import net.peacefulcraft.tarje.Tarje;
 import net.peacefulcraft.tarje.shop.ShopMenu;
 
 public class InventoryClickListener implements Listener {
+   private static final Set<UUID> quietCloses = Collections.newSetFromMap(new ConcurrentHashMap<UUID, Boolean>());
+
+  // Bukkit fires this when switching menus, so mark the next close as intentional.
+  public static void quietNextClose(Player player) {
+    quietCloses.add(player.getUniqueId());
+  }
+
+  public static boolean consumeQuietClose(Player player) {
+    return quietCloses.remove(player.getUniqueId());
+  }
 
   @EventHandler(ignoreCancelled = true)
   public void onInventoryClick(InventoryClickEvent ev) {
@@ -28,8 +43,10 @@ public class InventoryClickListener implements Listener {
         Tarje._this().logSevere("Index shop is out of sync with registered shops! User requested shop " + clickedItemName + " from index, but that shop is either not enabled or not configured.");
         ((Player) ev.getView().getPlayer()).sendMessage(Tarje.messagingPrefix + "Sorry, this shop is misconfigured and can not be opened.");
       } else {
+        Player player = (Player) ev.getView().getPlayer();
+        quietNextClose(player);
         ev.getView().close();
-        requstedShop.openShop((Player) ev.getView().getPlayer());
+        Tarje._this().synchronize(() -> requstedShop.openShop(player));
       }
 
 
@@ -45,10 +62,10 @@ public class InventoryClickListener implements Listener {
       String shopName = inventoryName.split(" ")[1];
 
       if (clickedItem.getType() == Material.BARRIER && clickedItem.getItemMeta().getDisplayName().equals("Cancel")) {
+        Player player = (Player) ev.getView().getPlayer();
+        quietNextClose(player);
         ev.getView().close();
-        Tarje._this().synchronize(() -> {
-          Tarje._this().getShop(shopName).openShop((Player) ev.getView().getPlayer());
-        });
+        Tarje._this().synchronize(() -> Tarje._this().getShop(shopName).openShop(player));
         return;
       }
 

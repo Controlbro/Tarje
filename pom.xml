@@ -5,8 +5,9 @@
   <version>0.0.4</version>
   <description>Off-brand, generic, and totally not copyright infringing Super Target for Minecraft.</description>
   <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>25</maven.compiler.source>
+    <maven.compiler.target>25</maven.compiler.target>
+	<spigot.version>26.1.2-R0.1-SNAPSHOT</spigot.version>
   </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -25,7 +26,7 @@
     <dependency>
         <groupId>org.spigotmc</groupId>
         <artifactId>spigot-api</artifactId>
-        <version>1.16.5-R0.1-SNAPSHOT</version>
+        <version>${spigot.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

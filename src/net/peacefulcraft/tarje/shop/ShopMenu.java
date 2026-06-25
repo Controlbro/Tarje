@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import net.peacefulcraft.tarje.Tarje;
 import net.peacefulcraft.tarje.config.ShopConfiguration;
+import net.peacefulcraft.tarje.listeners.InventoryClickListener;
 import net.peacefulcraft.tarje.config.ShopItem;
 
 public class ShopMenu {
@@ -68,14 +70,14 @@ public class ShopMenu {
       lore.add("Buy: $" + item.getBuyPrice());
       Tarje._this().putPurchasableItemIntoIndex(item.getItem(), item.getBuyPrice());
     } else {
-      lore.add("Item can not purchasable");
+      lore.add(" Item can not purchasable");
     }
 
     if (item.isSellable()) {
       lore.add("Sell: $" + item.getSellPrice());
       Tarje._this().putSellableItemIndex(item.getItem(), item.getSellPrice());
     } else {
-      lore.add("Item can not be sold");
+      lore.add(" Item can not be sold");
     }
 
     displayMeta.setLore(lore);
@@ -122,12 +124,15 @@ public class ShopMenu {
   public void onShopInventoryClick(Player p, int slotNumber, ItemStack item) {
     if (!this.activeViews.containsKey(p)) { return; }
     ShopItem shopItem = this.config.getItems().get(slotNumber);
+    if (shopItem == null) { return; }
+    
     if (!shopItem.isPurchasable()) {
       p.sendMessage(Tarje.messagingPrefix + "Sorry, " + shopItem.getItem() + " is not purchasable.");
       return;
     }
 
     Inventory purchaseQuantityMenu = this.generatePurchaseQuantityMenu(shopItem);
+    InventoryClickListener.quietNextClose(p);
     this.closeShop(p);
     Bukkit.getScheduler().runTask(Tarje._this(), () -> {
       this.activeViews.put(p, p.openInventory(purchaseQuantityMenu));
@@ -177,7 +182,7 @@ public class ShopMenu {
 
     if (!Tarje._this().getEconomyService().has(p, purcahsePrice)) {
       double playerBalance = Tarje._this().getEconomyService().getBalance(p);
-      p.sendMessage(Tarje.messagingPrefix + "Sorry, " + shopItem.getItem() + " costs $" + purcahsePrice + " and your account balance is only $" + playerBalance + ".");
+      p.sendMessage(Tarje.messagingPrefix + " Sorry, " + shopItem.getItem() + " costs $" + purcahsePrice + " and your account balance is only $" + playerBalance + ".");
       return;
     }
 
@@ -186,7 +191,8 @@ public class ShopMenu {
     for(ItemStack temp : leftovers.values()) {
       p.getLocation().getWorld().dropItemNaturally(p.getLocation(), temp);
     }
-    p.sendMessage(Tarje.messagingPrefix + "You bought " + purchaseQuantity + " " + shopItem.getItem() + " for $" + purcahsePrice + ".");
+    p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.5f);
+    p.sendMessage(Tarje.messagingPrefix + " You bought " + purchaseQuantity + " " + shopItem.getItem() + " for $" + purcahsePrice + ".");
   }
 
   /**
@@ -202,7 +208,7 @@ public class ShopMenu {
   public void closeAllInventoryViews() {
     this.activeViews.forEach((p, view) -> {
       view.close();
-      p.sendMessage(Tarje.messagingPrefix + "GUIShop has been updated. You can re-open the shop with /shop");
+      p.sendMessage(Tarje.messagingPrefix + " GUIShop has been updated. You can re-open the shop with /shop");
     });
   }
 }
