@@ -5,8 +5,7 @@
   <version>0.0.4</version>
   <description>Off-brand, generic, and totally not copyright infringing Super Target for Minecraft.</description>
   <properties>
-    <maven.compiler.source>25</maven.compiler.source>
-    <maven.compiler.target>25</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
 	<spigot.version>26.1.2-R0.1-SNAPSHOT</spigot.version>
   </properties>
   <build>
