@@ -1,6 +1,8 @@
 package net.peacefulcraft.tarje.shop;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -50,7 +52,7 @@ public class SellMenu {
     if(!this.openViews.containsKey(p)) { return; }
     this.openViews.remove(p);
 
-    String confirmationMessage = " You sold ";
+    Map<Material, Integer> soldItems = new LinkedHashMap<Material, Integer>();
     double moneyDue = 0.0;
     for (ItemStack item : inventory.getContents()) {
       if (item == null || item.getType() == Material.AIR) { continue; }
@@ -58,7 +60,7 @@ public class SellMenu {
       if (Tarje._this().isItemSellable(item.getType())) {
         Tarje._this().logDebug(item.getType() + " is sellable for " + Tarje._this().getSellableItemPrice(item.getType()));
         moneyDue += Tarje._this().getSellableItemPrice(item.getType()) * item.getAmount();
-        confirmationMessage += item.getType() + ", ";
+        soldItems.merge(item.getType(), item.getAmount(), Integer::sum);
       } else {
         p.sendMessage(Tarje.messagingPrefix + item.getType() + " is not sellable.");
         p.getInventory().addItem(item);
@@ -66,9 +68,20 @@ public class SellMenu {
     }
 
     if (moneyDue > 0) {
-      confirmationMessage = confirmationMessage.substring(0, confirmationMessage.length() - 2);
-      p.sendMessage(Tarje.messagingPrefix + confirmationMessage + " for $" + moneyDue);
+      p.sendMessage(Tarje.messagingPrefix + " You sold " + formatSoldItems(soldItems) + " for $" + moneyDue);
       Tarje._this().getEconomyService().depositPlayer(p, moneyDue);
     }
+  }
+  
+  private String formatSoldItems(Map<Material, Integer> soldItems) {
+    StringBuilder confirmationItems = new StringBuilder();
+    for (Map.Entry<Material, Integer> soldItem : soldItems.entrySet()) {
+      if (confirmationItems.length() > 0) {
+        confirmationItems.append(", ");
+      }
+
+      confirmationItems.append(soldItem.getKey()).append(" (").append(soldItem.getValue()).append(")");
+    }
+    return confirmationItems.toString();
   }
 }
