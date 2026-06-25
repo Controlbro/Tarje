@@ -70,14 +70,14 @@ public class ShopMenu {
       lore.add("Buy: $" + item.getBuyPrice());
       Tarje._this().putPurchasableItemIntoIndex(item.getItem(), item.getBuyPrice());
     } else {
-      lore.add(" Item can not purchasable");
+      lore.add("Item can not bought");
     }
 
     if (item.isSellable()) {
       lore.add("Sell: $" + item.getSellPrice());
       Tarje._this().putSellableItemIndex(item.getItem(), item.getSellPrice());
     } else {
-      lore.add(" Item can not be sold");
+      lore.add("Item can not be sold");
     }
 
     displayMeta.setLore(lore);
@@ -127,7 +127,7 @@ public class ShopMenu {
     if (shopItem == null) { return; }
     
     if (!shopItem.isPurchasable()) {
-      p.sendMessage(Tarje.messagingPrefix + "Sorry, " + shopItem.getItem() + " is not purchasable.");
+      p.sendMessage(Tarje.messagingPrefix + " Sorry, " + shopItem.getItem() + " is not purchasable.");
       return;
     }
 
