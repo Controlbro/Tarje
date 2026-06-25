@@ -60,7 +60,7 @@ public class SellMenu {
         moneyDue += Tarje._this().getSellableItemPrice(item.getType()) * item.getAmount();
         confirmationMessage += item.getType() + ", ";
       } else {
-        p.sendMessage(Tarje.messagingPrefix + item.getType() + " is not sellable.");
+        p.sendMessage(Tarje.messagingPrefix + " " + item.getType() + " is not sellable.");
         p.getInventory().addItem(item);
       }
     }
