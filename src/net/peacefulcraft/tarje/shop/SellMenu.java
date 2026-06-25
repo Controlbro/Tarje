@@ -50,7 +50,7 @@ public class SellMenu {
     if(!this.openViews.containsKey(p)) { return; }
     this.openViews.remove(p);
 
-    String confirmationMessage = "You sold ";
+    String confirmationMessage = " You sold ";
     double moneyDue = 0.0;
     for (ItemStack item : inventory.getContents()) {
       if (item == null || item.getType() == Material.AIR) { continue; }
