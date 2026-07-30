@@ -191,7 +191,6 @@ public class ShopMenu {
     for(ItemStack temp : leftovers.values()) {
       p.getLocation().getWorld().dropItemNaturally(p.getLocation(), temp);
     }
-    p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.5f);
     p.sendMessage(Tarje.messagingPrefix + " You bought " + purchaseQuantity + " " + shopItem.getItem() + " for $" + purcahsePrice + ".");
   }
 
