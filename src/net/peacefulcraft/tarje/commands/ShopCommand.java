@@ -24,7 +24,13 @@ public class ShopCommand implements CommandExecutor {
 
       Tarje._this().getIndexShop().openShop(((Player) sender));
     } else if (label.equalsIgnoreCase("sell") || label.equalsIgnoreCase("vender")) {
-      Tarje._this().getSellMenu().openMenu((Player) sender);
+      if (args.length == 1 && args[0].equalsIgnoreCase("hand")) {
+        Tarje._this().getSellMenu().sellHand((Player) sender);
+      } else if (args.length == 0) {
+        Tarje._this().getSellMenu().openMenu((Player) sender);
+      } else {
+        sender.sendMessage(Tarje.messagingPrefix + " Usage: /" + label + " [hand]");
+      }
     }
     
     return true;
