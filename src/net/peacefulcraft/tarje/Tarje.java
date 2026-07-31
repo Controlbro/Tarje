@@ -3,13 +3,9 @@ package net.peacefulcraft.tarje;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -23,6 +19,7 @@ import net.peacefulcraft.tarje.config.Configuration;
 import net.peacefulcraft.tarje.listeners.InventoryClickListener;
 import net.peacefulcraft.tarje.listeners.InventoryCloseListener;
 import net.peacefulcraft.tarje.shop.SellMenu;
+import net.peacefulcraft.tarje.shop.IndexMenu;
 import net.peacefulcraft.tarje.shop.ShopMenu;
 public class Tarje extends JavaPlugin {
   
@@ -37,8 +34,8 @@ public class Tarje extends JavaPlugin {
   private Economy economyService;
     public Economy getEconomyService() { return economyService; }
 
-  private ShopMenu indexShop;
-    public ShopMenu getIndexShop() { return indexShop; }
+  private IndexMenu indexShop;
+    public IndexMenu getIndexShop() { return indexShop; }
 
   private HashMap<String, ShopMenu> shops;
     public boolean shopExists(String name) { return shops.containsKey(name); }
@@ -92,31 +89,8 @@ public class Tarje extends JavaPlugin {
   }
 
     private void generateIndexShop() {
-      int shopInventorySize = ((this.shops.size() / 9) * 9) + 9;
-      if (this.indexShop == null || this.indexShop.getShopSize() > shopInventorySize) {
-        if (this.indexShop != null) {
-          this.indexShop.closeAllInventoryViews();
-        }
-        this.indexShop = new ShopMenu("Server Shops", (this.shops.size() / 9 * 9) + 9);
-      }
-
-      AtomicReferenceArray<ItemStack> shopItems = new AtomicReferenceArray<>(shops.size());
-      AtomicInteger i = new AtomicInteger(0);
-      this.shops.entrySet().forEach((shop) -> {
-        ItemStack shopItem = new ItemStack(shop.getValue().getConfig().getDisplayItem());
-        ItemMeta itemMeta = shopItem.getItemMeta();
-        itemMeta.setDisplayName(shop.getKey());
-        shopItem.setItemMeta(itemMeta);
-        shopItems.set(i.getAndIncrement(), shopItem);
-      });
-
-      for (int j=0; j<shopInventorySize; j++) {
-        if (j > shopItems.length() - 1) {
-          this.indexShop.setShopItem(j, new ItemStack(Material.AIR));
-        } else {
-          this.indexShop.setShopItem(j, shopItems.get(j));
-        }
-      }
+      if (this.indexShop != null) this.indexShop.closeAllInventoryViews();
+      this.indexShop = new IndexMenu(this.shops);
     }
 
   public void logDebug(String message) {
@@ -138,15 +112,17 @@ public class Tarje extends JavaPlugin {
   }
 
   public void reloadPlugin() {
-    this.indexShop.closeAllInventoryViews();
+    if (this.indexShop != null) this.indexShop.closeAllInventoryViews();
     this.shops.values().forEach((shopMenu) -> {
       shopMenu.closeAllInventoryViews();
     });
 
+    this.reloadConfig();
     this.shops = new HashMap<String, ShopMenu>();
     this.purchasableItemIndex = new HashMap<Material, Double>();
     this.sellableItemIndex = new HashMap<Material, Double>();
     this.configuration = new Configuration(this.getConfig());
+    this.generateIndexShop();
   }
 
   /**
