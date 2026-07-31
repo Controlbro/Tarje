@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -72,6 +73,7 @@ public class Tarje extends JavaPlugin {
   public void onEnable() {
     if (!this.setupDependencies()) {
       this.getServer().getPluginManager().disablePlugin(this);
+      return;
     }
 
     this._this = this;
@@ -142,7 +144,16 @@ public class Tarje extends JavaPlugin {
           this.logSevere("This plugin requires Vault to function and will now disable itself because Vault is not installed on this server.");
           return false;
         }
-        this.economyService = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
+
+        RegisteredServiceProvider<Economy> economyRegistration =
+            getServer().getServicesManager().getRegistration(Economy.class);
+        Economy economyProvider = economyRegistration == null ? null : economyRegistration.getProvider();
+        if (economyProvider == null) {
+          this.logSevere("This plugin requires a Vault-compatible economy provider and will now disable itself because none is registered.");
+          return false;
+        }
+
+        this.economyService = economyProvider;
         return true;
       }
 
