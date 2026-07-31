@@ -1,13 +1,11 @@
 package net.peacefulcraft.tarje.config;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import net.peacefulcraft.tarje.Tarje;
 import net.peacefulcraft.tarje.shop.ShopMenu;
@@ -31,10 +29,7 @@ public class Configuration {
      * Load the default plugin configration and use it's values as fallbacks if user-supplied configuration is incomplete.
      * This will also copy the default values for any missing configuration directives into the user's configuration.
      */
-    URL defaultConfigurationURI = getClass().getClassLoader().getResource("config.yml");
-    File defaultConfigurationFile = new File(defaultConfigurationURI.toString());
-    YamlConfiguration defaultConfiguration = YamlConfiguration.loadConfiguration(defaultConfigurationFile);
-    c.setDefaults(defaultConfiguration);
+    c.options().copyDefaults(true);
     saveConfiguration();
 
     loadShopConfigurations();
