@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 
 import net.peacefulcraft.tarje.Tarje;
 import net.peacefulcraft.tarje.shop.ShopMenu;
+import net.peacefulcraft.tarje.shop.IndexMenu;
 
 public class InventoryClickListener implements Listener {
    private static final Set<UUID> quietCloses = Collections.newSetFromMap(new ConcurrentHashMap<UUID, Boolean>());
@@ -35,19 +36,9 @@ public class InventoryClickListener implements Listener {
     Tarje._this().logDebug("click on inventory " + inventoryName);
 
     // Check if index shop
-    if (inventoryName.equals("Server Shops") && clickedItem != null) {
-      String clickedItemName = clickedItem.getItemMeta().getDisplayName();
-      ShopMenu requstedShop = Tarje._this().getShop(clickedItemName);
+    if (IndexMenu.isIndexTitle(inventoryName) && clickedItem != null) {
       ev.setCancelled(true);
-      if (requstedShop == null) {
-        Tarje._this().logSevere("Index shop is out of sync with registered shops! User requested shop " + clickedItemName + " from index, but that shop is either not enabled or not configured.");
-        ((Player) ev.getView().getPlayer()).sendMessage(Tarje.messagingPrefix + " Sorry, this shop is misconfigured and can not be opened.");
-      } else {
-        Player player = (Player) ev.getView().getPlayer();
-        quietNextClose(player);
-        ev.getView().close();
-        Tarje._this().synchronize(() -> requstedShop.openShop(player));
-      }
+      Tarje._this().getIndexShop().onClick((Player) ev.getView().getPlayer(), clickedItem);
 
 
     // Check if clicked inventory was a shop
