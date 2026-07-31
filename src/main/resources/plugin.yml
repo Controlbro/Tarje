@@ -22,7 +22,7 @@ commands:
     aliases: [ vender ]
     description: Used to open the sell menu
     permission-message:  Sorry, you don't have access to open the sell menu
-    usage: /<command> to open the shop
+    usage: /<command> [hand] to open the sell menu or sell the held stack
 
 permissions:
   tarje.*:
