@@ -18,7 +18,8 @@ import net.peacefulcraft.tarje.listeners.InventoryClickListener;
 /** The paginated list of enabled shops. */
 public class IndexMenu {
   public static final String TITLE = "Server Shops";
-  private static final int PAGE_SIZE = 54;
+  private static final int ROW_SIZE = 9;
+  private static final int MAX_INVENTORY_SIZE = 54;
   private static final int SHOPS_PER_PAGE = 45;
 
   private final List<Inventory> pages = new ArrayList<>();
@@ -26,11 +27,11 @@ public class IndexMenu {
 
   public IndexMenu(Map<String, ShopMenu> shops) {
     List<Map.Entry<String, ShopMenu>> entries = new ArrayList<>(shops.entrySet());
-    int pageCount = Math.max(1, (entries.size() + SHOPS_PER_PAGE - 1) / SHOPS_PER_PAGE);
+    int pageCount = getPageCount(entries.size());
     for (int page = 0; page < pageCount; page++) {
       String title = pageCount == 1 ? TITLE : TITLE + " (" + (page + 1) + "/" + pageCount + ")";
       Inventory inventory = Tarje._this().getServer().createInventory(null,
-          pageCount == 1 ? Math.max(9, ((entries.size() + 8) / 9) * 9) : PAGE_SIZE, title);
+          pageCount == 1 ? getInventorySize(entries.size()) : MAX_INVENTORY_SIZE, title);
       int start = page * SHOPS_PER_PAGE;
       for (int i = start; i < Math.min(start + SHOPS_PER_PAGE, entries.size()); i++) {
         Map.Entry<String, ShopMenu> shop = entries.get(i);
@@ -46,6 +47,17 @@ public class IndexMenu {
       }
       pages.add(inventory);
     }
+  }
+
+  /** Returns enough complete rows for every shop*/
+  static int getInventorySize(int shopCount) {
+    int requiredRows = Math.max(1, (shopCount + ROW_SIZE - 1) / ROW_SIZE);
+    return Math.min(MAX_INVENTORY_SIZE, requiredRows * ROW_SIZE);
+  }
+
+  private static int getPageCount(int shopCount) {
+    if (shopCount <= MAX_INVENTORY_SIZE) return 1;
+    return (shopCount + SHOPS_PER_PAGE - 1) / SHOPS_PER_PAGE;
   }
 
   private ItemStack navigationItem(String name) {
