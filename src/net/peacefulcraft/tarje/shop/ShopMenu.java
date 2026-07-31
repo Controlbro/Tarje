@@ -41,7 +41,7 @@ public class ShopMenu {
     this.activeViews = new HashMap<Player, InventoryView>();
 
     int highestConfiguredSlot = config.getItems().keySet().stream().mapToInt(Integer::intValue).max().orElse(-1);
-    int requiredSlots = Math.max(ROW_SIZE, highestConfiguredSlot + 2); // save one slot for back.
+    int requiredSlots = Math.max(ROW_SIZE, highestConfiguredSlot + 2); // Reserve one slot for Back.
     int inventorySize = Math.min(MAX_CHEST_SIZE, ((requiredSlots + ROW_SIZE - 1) / ROW_SIZE) * ROW_SIZE);
     inventory = Tarje._this().getServer().createInventory(null, inventorySize, config.getShopName());
     for (ShopItem item : config) {
@@ -49,7 +49,7 @@ public class ShopMenu {
         setShopItem(item.getSlot(), item);
       } else {
         Tarje._this().logWarning("Item in slot " + item.getSlot() + " of " + config.getShopName()
-            + " cannot be displayed, chest inventories support slots 0-53 and one slot is reserved for back.");
+            + " cannot be displayed; chest inventories support slots 0-53 and one slot is reserved for Back.");
       }
     }
 
