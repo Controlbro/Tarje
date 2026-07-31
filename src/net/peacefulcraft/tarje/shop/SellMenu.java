@@ -17,7 +17,6 @@ import net.peacefulcraft.tarje.Tarje;
 
 public class SellMenu {
 
-  private Player p;
   private HashMap<Player, InventoryView> openViews;
 
   public SellMenu() {
@@ -30,6 +29,26 @@ public class SellMenu {
  */
   public void openMenu(Player p) {
     this.openViews.put(p, p.openInventory(Bukkit.getServer().createInventory(null, 45, "Sell Items")));
+  }
+
+  /** Sell the stack held in the player's main hand. */
+  public void sellHand(Player player) {
+    ItemStack heldItem = player.getInventory().getItemInMainHand();
+    if (heldItem.getType() == Material.AIR || heldItem.getAmount() == 0) {
+      player.sendMessage(Tarje.messagingPrefix + " You are not holding an item to sell.");
+      return;
+    }
+    if (!Tarje._this().isItemSellable(heldItem.getType())) {
+      player.sendMessage(Tarje.messagingPrefix + " " + heldItem.getType() + " is not sellable.");
+      return;
+    }
+
+    int amount = heldItem.getAmount();
+    Material material = heldItem.getType();
+    double payment = Tarje._this().getSellableItemPrice(material) * amount;
+    player.getInventory().setItemInMainHand(null);
+    Tarje._this().getEconomyService().depositPlayer(player, payment);
+    player.sendMessage(Tarje.messagingPrefix + " You sold " + material + " (" + amount + ") for $" + payment);
   }
 
   /**
