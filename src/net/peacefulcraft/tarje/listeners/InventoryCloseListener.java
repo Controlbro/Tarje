@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import net.peacefulcraft.tarje.Tarje;
+import net.peacefulcraft.tarje.shop.IndexMenu;
 
 public class InventoryCloseListener implements Listener {
 
@@ -14,17 +15,21 @@ public class InventoryCloseListener implements Listener {
     String inventoryName = ev.getView().getTitle();
 
     // Check if index shop
-    if (inventoryName.equals("Server Shops")) {
+    Player player = (Player) ev.getPlayer();
+    boolean quietClose = InventoryClickListener.consumeQuietClose(player);
+
+    if (IndexMenu.isIndexTitle(inventoryName)) {
       Tarje._this().synchronize(() -> {
-        Tarje._this().getIndexShop().onInventoryClosed((Player) ev.getPlayer());
+        Tarje._this().getIndexShop().onInventoryClosed(player);
         Tarje._this().logDebug("Unregistered InventoryView for " + ev.getPlayer().getName() + " on shop " + inventoryName);
       });
 
     // Check if general item shop
     } else if (Tarje._this().shopExists(inventoryName)) {
       Tarje._this().synchronize(() -> {
-        Tarje._this().getShops().get(inventoryName).onInventoryClosed((Player) ev.getPlayer());
+        Tarje._this().getShops().get(inventoryName).onInventoryClosed(player);
         Tarje._this().logDebug("Unregistered InventoryView for " + ev.getPlayer().getName() + " on shop " + inventoryName);
+        if (!quietClose) Tarje._this().getIndexShop().openShop(player);
       });
     
     
