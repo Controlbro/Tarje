@@ -5,9 +5,7 @@ import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -27,6 +25,10 @@ public class ShopMenu {
   private Inventory inventory;
     public int getShopSize() { return inventory.getSize(); }
 
+  private static final int ROW_SIZE = 9;
+  private static final int MAX_CHEST_SIZE = 54;
+  public static final String BACK_BUTTON_NAME = "Back to Server Shops";
+
   private HashMap<Player, InventoryView> activeViews;
 
   public ShopMenu(String title, int size) {
@@ -38,10 +40,24 @@ public class ShopMenu {
     this.config = config;
     this.activeViews = new HashMap<Player, InventoryView>();
 
-    inventory = Tarje._this().getServer().createInventory(null, InventoryType.CHEST, config.getShopName());
-    for(ShopItem item : config) {
-      setShopItem(item.getSlot(), item);
+    int highestConfiguredSlot = config.getItems().keySet().stream().mapToInt(Integer::intValue).max().orElse(-1);
+    int requiredSlots = Math.max(ROW_SIZE, highestConfiguredSlot + 2); // save one slot for back.
+    int inventorySize = Math.min(MAX_CHEST_SIZE, ((requiredSlots + ROW_SIZE - 1) / ROW_SIZE) * ROW_SIZE);
+    inventory = Tarje._this().getServer().createInventory(null, inventorySize, config.getShopName());
+    for (ShopItem item : config) {
+      if (item.getSlot() < inventorySize - 1) {
+        setShopItem(item.getSlot(), item);
+      } else {
+        Tarje._this().logWarning("Item in slot " + item.getSlot() + " of " + config.getShopName()
+            + " cannot be displayed, chest inventories support slots 0-53 and one slot is reserved for back.");
+      }
     }
+
+    ItemStack backButton = new ItemStack(Material.BARRIER);
+    ItemMeta backMeta = backButton.getItemMeta();
+    backMeta.setDisplayName(BACK_BUTTON_NAME);
+    backButton.setItemMeta(backMeta);
+    inventory.setItem(inventorySize - 1, backButton);
   }
 
   /**
@@ -123,6 +139,14 @@ public class ShopMenu {
    */
   public void onShopInventoryClick(Player p, int slotNumber, ItemStack item) {
     if (!this.activeViews.containsKey(p)) { return; }
+    if (slotNumber == inventory.getSize() - 1 && item.getType() == Material.BARRIER
+        && item.hasItemMeta() && BACK_BUTTON_NAME.equals(item.getItemMeta().getDisplayName())) {
+      InventoryClickListener.quietNextClose(p);
+      closeShop(p);
+      Bukkit.getScheduler().runTask(Tarje._this(), () -> Tarje._this().getIndexShop().openShop(p));
+      return;
+    }
+
     ShopItem shopItem = this.config.getItems().get(slotNumber);
     if (shopItem == null) { return; }
     
